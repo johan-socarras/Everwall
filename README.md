@@ -1,16 +1,29 @@
-# Everwall
+<p align="center">
+  <img src="src-tauri/icons/icon.png" width="96" alt="Everwall icon">
+</p>
 
-A tray app for Windows 11 and Ubuntu (GNOME) that puts a different wallpaper
-on each screen, chosen from collections of folders and laid out to suit the
-shape of each screen.
+<h1 align="center">Everwall</h1>
+
+<p align="center">
+  A different wallpaper on each screen, laid out to suit its shape.<br>
+  A tray app for Windows 11 and Ubuntu (GNOME), built with Rust and Tauri.
+</p>
+
+<p align="center">
+  <a href="https://github.com/johan-socarras/Everwall/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/johan-socarras/Everwall?color=6d5dfc"></a>
+  <a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue"></a>
+  <img alt="Runs on Windows 11 and Ubuntu (GNOME)" src="https://img.shields.io/badge/runs%20on-Windows%2011%20%7C%20Ubuntu%20(GNOME)-2bb3ff">
+</p>
+
+![Three screens with wallpapers placed by Everwall: a portrait photo fills a portrait screen, three portrait photos form a triptych on a wide screen, and a square photo sits whole over a blurred copy of itself](docs/hero.jpg)
+
+<p align="center"><sub>Photos: NASA, public domain (the Artemis I launch by Joel Kowsky, the Earth by the Apollo 17 crew).</sub></p>
 
 Windows can show a slideshow, but it picks images blindly: a portrait photo on
 a landscape monitor ends up cropped or letterboxed, and a rotated monitor gets
 images that were never meant for it. GNOME cannot even give each screen its
-own wallpaper. Everwall looks at each image and each screen before it decides
-how to place it.
-
-![Everwall's settings window, with sample data: three screens and the triptych on the main one](docs/screenshot.png)
+own wallpaper. Everwall takes its wallpapers from collections of folders and
+looks at each image and each screen before it decides how to place it.
 
 ## Download
 
@@ -46,7 +59,7 @@ Ubuntu 26.04 (GNOME 50); on an older Ubuntu, build it from source. The accent
 colour needs GNOME 47 or later. It needs WebKitGTK 4.1, the AppIndicator
 support Ubuntu ships for tray icons, and `zenity` for the folder picker:
 
-```
+```sh
 sudo apt install libwebkit2gtk-4.1-0 libayatana-appindicator3-1 zenity
 ```
 
@@ -102,6 +115,8 @@ own part.
   main screen: Wayland does not tell apps where the mouse is.
 - Interface in English or Spanish.
 
+![Everwall's settings window, with sample data: three screens, and the triptych on the main one](docs/screenshot.png)
+
 ## How it is built
 
 - `src-tauri/`: Rust with Tauri 2. One code base: what each system does
@@ -142,7 +157,7 @@ Requires:
   and Windows 11 only includes Windows PowerShell 5.1.
 - WebView2, which ships with Windows 11.
 
-```
+```powershell
 pwsh -File install.ps1
 ```
 
@@ -155,7 +170,7 @@ instead.
 
 Requires Rust and the libraries Tauri builds against:
 
-```
+```sh
 sudo apt install build-essential libwebkit2gtk-4.1-dev libgtk-3-dev \
   libayatana-appindicator3-dev librsvg2-dev libssl-dev zenity
 ./install.sh
@@ -176,12 +191,12 @@ the file manager.
 
 ## Checking it without changing the wallpaper
 
-```
-Everwall.exe --diagnostics out.txt   # screens, collections, time of day
-Everwall.exe --samples folder        # every layout rendered for every screen
+```powershell
+.\Everwall.exe --diagnostics out.txt   # screens, collections, time of day
+.\Everwall.exe --samples folder        # every layout rendered for every screen
 ```
 
-On Ubuntu the same options go to `everwall`.
+Run them in the app's folder. On Ubuntu the same options go to `everwall`.
 
 ## License
 
