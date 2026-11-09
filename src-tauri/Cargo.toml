@@ -1,0 +1,53 @@
+[package]
+name = "everwall"
+version = "1.0.0"
+description = "A different wallpaper on each screen"
+license = "GPL-3.0-only"
+edition = "2021"
+
+[features]
+# Without custom-protocol a plain `cargo build` makes a dev build that looks for
+# a dev server instead of the embedded ui/ folder. On by default so the
+# ordinary build is already the real app.
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Pinned to the release Everwall 1.0 was built and tested with. From 0.25.9
+# on, image decodes JPEG with zune-jpeg 0.5 instead of 0.4: bump it on
+# purpose, after checking JPEG wallpapers still load.
+image = { version = "=0.25.5", default-features = false, features = ["jpeg", "png", "webp", "bmp"] }
+base64 = "0.22"
+dirs = "6"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+windows = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Devices_Display",
+    "Win32_Globalization",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_System_Com",
+    "Win32_System_SystemInformation",
+    "Win32_System_Threading",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_Shell",
+    "Win32_UI_Shell_Common",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+# GNOME: D-Bus (screens, idle inhibitors, the file manager), GSettings
+# (wallpaper, accent colour, keyboard shortcuts) and local time. Tauri already
+# builds this crate on Linux, so it adds nothing to download.
+[target.'cfg(target_os = "linux")'.dependencies]
+gio = "0.18"
+
+[profile.release]
+strip = true

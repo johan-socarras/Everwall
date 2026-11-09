@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Everwall</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <div class="brand">
+        <svg viewBox="0 0 256 256" aria-hidden="true">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6d5dfc"/><stop offset="1" stop-color="#2bb3ff"/></linearGradient></defs>
+          <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#g)"/>
+          <rect x="28" y="88" width="44" height="80" rx="7" fill="#fff" opacity=".95"/>
+          <rect x="80" y="106" width="70" height="44" rx="7" fill="#fff" opacity=".95"/>
+          <rect x="158" y="106" width="70" height="44" rx="7" fill="#fff" opacity=".95"/>
+        </svg>
+        <span>Everwall</span>
+      </div>
+      <button class="nav-item active" data-view="screens">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="9" rx="1.5"/><rect x="18" y="4" width="4" height="12" rx="1"/><path d="M7 18h5"/></svg><span data-es="Pantallas">Screens</span>
+      </button>
+      <button class="nav-item" data-view="collections">
+        <svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="13" rx="1.5"/><path d="M7 3h13.5v13"/><path d="m6 16 3.5-4 3 3 2-2 2.5 3"/></svg><span data-es="Colecciones">Collections</span>
+      </button>
+      <button class="nav-item" data-view="general">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span data-es="General">General</span>
+      </button>
+      <div class="nav-foot" id="status"></div>
+    </nav>
+
+    <main>
+      <section id="v-screens" class="view">
+        <header class="view-head">
+          <div>
+            <h1 data-es="Pantallas">Screens</h1>
+            <p class="muted" data-es="Cada pantalla tiene su propio fondo. Elige una para cambiar de dónde salen sus imágenes y cómo se colocan.">Each screen has its own wallpaper. Pick one to change where its images come from and how they are placed.</p>
+          </div>
+          <div class="head-actions">
+            <label class="switch-row" title="While paused, wallpapers do not change on their own" data-title-es="Mientras está en pausa, los fondos no cambian solos">
+              <span data-es="Pausa">Pause</span>
+              <span class="switch"><input type="checkbox" id="pause"><span></span></span>
+            </label>
+            <button class="btn primary" id="next-all" data-es="Siguiente en todas">Next on all screens</button>
+          </div>
+        </header>
+        <div class="banner" id="error" hidden></div>
+        <div class="map-card card">
+          <div class="map" id="map"></div>
+        </div>
+        <div class="detail" id="detail"></div>
+      </section>
+
+      <section id="v-collections" class="view" hidden>
+        <header class="view-head">
+          <div>
+            <h1 data-es="Colecciones">Collections</h1>
+            <p class="muted" data-es="Una colección es un grupo de carpetas. Cada pantalla toma sus fondos de una colección.">A collection is a group of folders. Each screen takes its wallpapers from one collection.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn primary" id="new-collection" data-es="Nueva colección">New collection</button>
+          </div>
+        </header>
+        <div class="split">
+          <div class="card list" id="collection-list"></div>
+          <div class="card editor" id="collection-editor"></div>
+        </div>
+      </section>
+
+      <section id="v-general" class="view" hidden>
+        <header class="view-head">
+          <div>
+            <h1 data-es="General">General</h1>
+            <p class="muted" data-es="Lo que vale para todas las pantallas.">What applies to every screen.</p>
+          </div>
+        </header>
+        <div class="stack" id="general"></div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
