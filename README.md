@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/johan-socarras/Everwall/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/johan-socarras/Everwall/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/johan-socarras/Everwall/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/johan-socarras/Everwall?color=6d5dfc"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue"></a>
   <img alt="Runs on Windows 11 and Ubuntu (GNOME)" src="https://img.shields.io/badge/runs%20on-Windows%2011%20%7C%20Ubuntu%20(GNOME)-2bb3ff">
