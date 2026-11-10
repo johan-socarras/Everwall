@@ -137,7 +137,9 @@ own part.
   libraries. Opened in an ordinary browser it shows sample data.
 - `install.ps1` and `package.ps1`: install from source on Windows, or build
   the release zip. `install.sh` and `package.sh` do the same on Linux.
-- `tools/make-icon.ps1`: draws the icon.
+- `tools/make-icon.ps1`: draws the icon. `tools/third-party-licenses.py`
+  writes `THIRD-PARTY-LICENSES.txt` from `Cargo.lock`, the Rust toolchain
+  and the texts in `tools/licenses/` that come with no crate.
 
 A second launch does not start another copy: it hands its order to the one
 already running.
@@ -212,3 +214,8 @@ Copyright (C) 2026 Johan Socarras.
 Everwall is free software under the [GNU General Public License v3.0](LICENSE):
 you may use, study, share and modify it, and any version you distribute must
 keep this license and come with its source code.
+
+The libraries Everwall is built with, and Microsoft's WebView2 loader in the
+Windows package, keep their own licenses: see
+[THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt), which both release
+packages include.

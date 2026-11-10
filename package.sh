@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Builds Everwall and packs the Linux tar.gz attached to each GitHub release:
-# the everwall program, its icon, install.sh and the licence.
+# the everwall program, its icon, install.sh, its licence and the licences of
+# the libraries built into it (THIRD-PARTY-LICENSES.txt).
 #   ./package.sh             build and pack
 #   ./package.sh --no-build  pack the last build
 # The package is written next to the build (CARGO_TARGET_DIR or
@@ -28,6 +29,7 @@ install -m755 "$target/release/everwall" "$stage/everwall"
 install -m755 "$here/install.sh" "$stage/install.sh"
 install -m644 "$tauri/icons/icon.png" "$stage/everwall.png"
 install -m644 "$here/LICENSE" "$stage/LICENSE"
+install -m644 "$here/THIRD-PARTY-LICENSES.txt" "$stage/THIRD-PARTY-LICENSES.txt"
 
 # owned by root in the archive, not by whoever built it
 tar --owner=0 --group=0 --numeric-owner -czf "$package" -C "$target" "$name"
