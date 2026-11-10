@@ -9,12 +9,34 @@ use crate::{gnome, model, render};
 use gio::glib::Variant;
 use gio::prelude::*;
 use image::RgbImage;
+use serde::{Deserialize, Serialize};
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, HashMap};
+use std::path::Path;
+use std::time::Duration;
 
 const BACKGROUND: &str = "org.gnome.desktop.background";
 /// What Everwall changes in the background settings, and gives back.
 const KEYS: [&str; 3] = ["picture-uri", "picture-uri-dark", "picture-options"];
+/// Kept next to the joined pictures: what went into the last one.
+const JOINED: &str = "joined.json";
+/// How long the shell gets to put the desktop together after logging in
+/// before Everwall touches the wallpaper (see `settle`).
+const SETTLE: Duration = Duration::from_secs(20);
+
+/// The last joined picture: the image each screen got and where the screens
+/// were. With it, a new start knows the desktop already shows what it would
+/// set, and leaves it alone.
+#[derive(Serialize, Deserialize, PartialEq)]
+struct Joined {
+    picture: String,
+    screens: Vec<(String, i32, i32, u32, u32)>,
+    files: BTreeMap<String, String>,
+}
+
+fn layout(screens: &[Screen]) -> Vec<(String, i32, i32, u32, u32)> {
+    screens.iter().map(|s| (s.id.clone(), s.x, s.y, s.w, s.h)).collect()
+}
 
 /// Lives on the engine thread only.
 pub struct Desktop {
@@ -26,10 +48,24 @@ pub struct Desktop {
 
 impl Desktop {
     pub fn new() -> Result<Self, String> {
-        if gnome::settings(BACKGROUND, None).is_none() {
+        let Some(settings) = gnome::settings(BACKGROUND, None) else {
             return Err(format!("{BACKGROUND} is not installed"));
+        };
+        settle();
+        let desktop = Self { files: RefCell::default(), dirty: Cell::new(false) };
+        // The picture on the desktop is still the one Everwall joined last
+        // time, for the same screens: those are the screens' images, and
+        // setting them again would only make GNOME load it all again.
+        let current = gio::File::for_uri(&settings.string("picture-uri")).path();
+        let joined = std::fs::read_to_string(model::data_dir().join("desktop").join(JOINED))
+            .ok()
+            .and_then(|text| serde_json::from_str::<Joined>(&text).ok());
+        if let (Some(current), Some(joined)) = (current, joined) {
+            if current == Path::new(&joined.picture) && current.is_file() && joined.screens == layout(&desktop.screens()) {
+                *desktop.files.borrow_mut() = joined.files;
+            }
         }
-        Ok(Self { files: RefCell::default(), dirty: Cell::new(false) })
+        Ok(desktop)
     }
 
     /// Connected monitors, left to right.
@@ -120,13 +156,52 @@ impl Desktop {
         settings.set_string("picture-uri-dark", &uri).map_err(fail)?;
         gnome::sync();
         // GNOME already read the new picture's name; the old ones can go
+        let record = dir.join(JOINED);
         if let Ok(entries) = std::fs::read_dir(&dir) {
-            for entry in entries.flatten().filter(|e| e.path() != file) {
+            for entry in entries.flatten().filter(|e| e.path() != file && e.path() != record) {
                 let _ = std::fs::remove_file(entry.path());
             }
         }
+        let joined = Joined { picture: file.display().to_string(), screens: layout(screens), files };
+        if let Ok(text) = serde_json::to_string(&joined) {
+            let _ = std::fs::write(&record, text);
+        }
         Ok(())
     }
+}
+
+/// GNOME starts Everwall with the session, while the shell is still putting
+/// the desktop together. A new picture in those first seconds can leave some
+/// monitors without it, grey until something makes the shell draw them again.
+/// So nothing is set until the shell has been running for `SETTLE`.
+fn settle() {
+    let Some(age) = shell_age() else { return };
+    if let Some(wait) = SETTLE.checked_sub(age).filter(|w| !w.is_zero()) {
+        model::log(&format!("the desktop is still starting: waiting {} s", wait.as_secs()));
+        std::thread::sleep(wait);
+    }
+}
+
+/// How long this user's gnome-shell has been running, from /proc. Start times
+/// there count in USER_HZ ticks, which Linux fixes at 100 a second.
+fn shell_age() -> Option<Duration> {
+    use std::os::unix::fs::MetadataExt;
+    let me = std::fs::metadata("/proc/self").ok()?.uid();
+    let uptime: f64 = std::fs::read_to_string("/proc/uptime").ok()?.split_whitespace().next()?.parse().ok()?;
+    let started = std::fs::read_dir("/proc").ok()?.flatten().find_map(|entry| {
+        if entry.metadata().ok()?.uid() != me {
+            return None;
+        }
+        let stat = std::fs::read_to_string(entry.path().join("stat")).ok()?;
+        // pid (comm) state ...: the name sits in brackets and may hold spaces
+        let (head, rest) = stat.rsplit_once(')')?;
+        if !head.ends_with("(gnome-shell") {
+            return None;
+        }
+        // after the brackets, field 3 (state) comes first; start time is field 22
+        rest.split_whitespace().nth(19)?.parse::<u64>().ok()
+    })?;
+    Some(Duration::from_secs_f64((uptime - started as f64 / 100.0).max(0.0)))
 }
 
 /// One entry per logical monitor (a mirrored pair counts once), in the
