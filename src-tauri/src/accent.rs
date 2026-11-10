@@ -84,3 +84,33 @@ fn hue(r: f32, g: f32, b: f32, max: f32, d: f32) -> f32 {
     };
     if h < 0.0 { h + 360.0 } else { h }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use image::Rgb;
+
+    #[test]
+    fn a_vivid_wallpaper_gives_its_own_colour() {
+        let [r, g, b] = dominant(&RgbImage::from_pixel(64, 36, Rgb([220, 30, 30])));
+        assert!(r > 200 && g < 60 && b < 60, "#{r:02x}{g:02x}{b:02x}");
+    }
+
+    #[test]
+    fn a_grey_wallpaper_gives_a_quiet_slate_blue() {
+        assert_eq!(dominant(&RgbImage::from_pixel(64, 36, Rgb([128, 128, 128]))), [0x5B, 0x6B, 0x7F]);
+    }
+
+    #[test]
+    fn the_colour_that_covers_most_of_the_wallpaper_wins() {
+        // two thirds green, one third blue
+        let mut image = RgbImage::from_pixel(60, 30, Rgb([30, 180, 60]));
+        for x in 40..60 {
+            for y in 0..30 {
+                image.put_pixel(x, y, Rgb([30, 60, 200]));
+            }
+        }
+        let [r, g, b] = dominant(&image);
+        assert!(g > r && g > b, "#{r:02x}{g:02x}{b:02x}");
+    }
+}

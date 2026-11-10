@@ -1,5 +1,6 @@
-# Lints and builds Everwall on every push to main and every pull request:
-# clippy with warnings as errors, then a release build, on Ubuntu (the
+# Lints, tests and builds Everwall on every push to main and every pull
+# request: clippy with warnings as errors, the unit tests and a release
+# build, on Ubuntu (the
 # libraries Tauri builds against come from apt) and on Windows (the runner's
 # default MSVC toolchain; the published zip is built with the GNU one, as the
 # README describes).
@@ -59,7 +60,10 @@ jobs:
           workspaces: src-tauri
 
       - name: Clippy
-        run: cargo clippy --release --locked -- -D warnings
+        run: cargo clippy --release --locked --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --release --locked
 
       - name: Build
         run: cargo build --release --locked

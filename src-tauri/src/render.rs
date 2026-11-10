@@ -271,3 +271,43 @@ pub fn preview(path: &str, max: u32) -> Option<String> {
     JpegEncoder::new_with_quality(&mut bytes, 80).encode_image(&small).ok()?;
     Some(format!("data:image/jpeg;base64,{}", base64::engine::general_purpose::STANDARD.encode(bytes)))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use image::Rgb;
+
+    fn plain(w: u32, h: u32, colour: [u8; 3]) -> RgbImage {
+        RgbImage::from_pixel(w, h, Rgb(colour))
+    }
+
+    #[test]
+    fn every_layout_comes_out_at_the_exact_screen_size() {
+        let portrait = plain(60, 90, [200, 80, 40]);
+        let landscape = plain(90, 60, [40, 80, 200]);
+        let three = [portrait.clone(), portrait.clone(), portrait.clone()];
+        for (w, h) in [(192, 108), (108, 192), (171, 97)] {
+            let area = Area { x: 0, y: 0, w, h: h - 5 };
+            assert_eq!(render(Layout::Fill, std::slice::from_ref(&landscape), w, h, area).dimensions(), (w, h));
+            assert_eq!(render(Layout::Blur, std::slice::from_ref(&portrait), w, h, area).dimensions(), (w, h));
+            assert_eq!(render(Layout::Triptych, &three, w, h, area).dimensions(), (w, h));
+        }
+    }
+
+    #[test]
+    fn the_panel_stays_out_of_the_taskbar() {
+        // a white image on a 160x120 screen whose bottom 20 px are the taskbar
+        let out = render(Layout::Blur, &[plain(40, 60, [255; 3])], 160, 120, Area { x: 0, y: 0, w: 160, h: 100 });
+        assert!(out.get_pixel(80, 50).0[0] > 250, "the panel is in the middle of the work area");
+        for x in 0..160 {
+            assert!(out.get_pixel(x, 110).0[0] < 200, "only the darkened background under the taskbar");
+        }
+    }
+
+    #[test]
+    fn cover_fills_the_requested_size_from_any_shape() {
+        for (w, h) in [(100, 50), (50, 100), (77, 77)] {
+            assert_eq!(cover(&plain(64, 48, [9, 9, 9]), w, h).dimensions(), (w, h));
+        }
+    }
+}

@@ -769,3 +769,33 @@ fn names(sources: &[String]) -> String {
         .collect::<Vec<_>>()
         .join(", ")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cropping_decides_between_full_screen_and_a_blurred_copy() {
+        let wide = 16.0 / 9.0;
+        assert!(crop_loss(wide, wide).abs() < 1e-9);
+        // a 3:2 photo on a 16:9 screen loses 15.6 %: it fills the screen
+        assert!(crop_loss(1.5, wide) <= 0.30);
+        // a square one would lose 43.75 %: whole, over a blurred copy
+        assert!(crop_loss(1.0, wide) > 0.30);
+        // the same loss whichever shape is the wider one
+        assert!((crop_loss(9.0 / 16.0, 0.5) - crop_loss(0.5, 9.0 / 16.0)).abs() < 1e-12);
+    }
+
+    #[test]
+    fn accent_colours_that_look_alike_count_as_close() {
+        assert!(close([200, 40, 40], [210, 50, 45]));
+        assert!(!close([200, 40, 40], [40, 40, 200]));
+    }
+
+    #[test]
+    fn the_file_prefix_of_a_monitor_is_stable_and_short() {
+        assert_eq!(short_id(r"\\?\DISPLAY#ABC"), short_id(r"\\?\display#abc"));
+        assert_ne!(short_id("left"), short_id("right"));
+        assert_eq!(short_id("left").len(), 8);
+    }
+}

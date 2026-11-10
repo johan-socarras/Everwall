@@ -69,3 +69,16 @@ fn nearest(rgb: [u8; 3]) -> (&'static str, [u8; 3]) {
     };
     COLOURS[..8].iter().copied().min_by(|a, b| distance(a.1).total_cmp(&distance(b.1))).unwrap_or(COLOURS[8])
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn each_colour_maps_to_the_nearest_gnome_accent() {
+        assert_eq!(nearest([0x35, 0x84, 0xE4]).0, "blue");
+        assert_eq!(nearest([230, 40, 60]).0, "red");
+        assert_eq!(nearest([60, 150, 70]).0, "green");
+        assert_eq!(nearest([128, 128, 128]).0, "slate");
+    }
+}

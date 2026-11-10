@@ -252,6 +252,27 @@ impl Settings {
     pub fn new_collection_id(&self) -> String {
         (1..).map(|n| format!("c{n}")).find(|id| self.collection(id).is_none()).unwrap_or_default()
     }
+
+    /// Takes a collection out and points every screen that named it at "All
+    /// my wallpapers" (or the first collection left), in all four places:
+    /// the times of day too while that option is off, so turning it on later
+    /// never finds a deleted collection. Returns the screens that used it.
+    pub fn forget_collection(&mut self, id: &str) -> Vec<String> {
+        self.collections.retain(|c| c.id != id);
+        let fallback = self.collection(ALL_ID).or(self.collections.first()).map(|c| c.id.clone()).unwrap_or_default();
+        let mut affected = Vec::new();
+        for (screen, ss) in self.screens.iter_mut() {
+            if ss.uses(id) {
+                affected.push(screen.clone());
+            }
+            for field in [&mut ss.collection, &mut ss.morning, &mut ss.afternoon, &mut ss.night] {
+                if *field == id {
+                    *field = fallback.clone();
+                }
+            }
+        }
+        affected
+    }
 }
 
 /// One wallpaper that was shown: the source images, how they were laid out
@@ -367,5 +388,106 @@ pub fn log(message: &str) {
     }
     if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
         let _ = writeln!(file, "{} {message}", system::local_now().stamp);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn collection(id: &str) -> Collection {
+        Collection { id: id.into(), name: format!("{FOLDER_PREFIX}{id}"), folders: Vec::new(), recursive: true }
+    }
+
+    fn shown(source: &str) -> Shown {
+        Shown { sources: vec![source.into()], layout: Layout::Fill, file: String::new(), size: (1, 1), at: 0 }
+    }
+
+    #[test]
+    fn each_hour_falls_in_its_time_of_day() {
+        let settings = Settings { morning_from: 6, afternoon_from: 12, night_from: 19, ..Settings::default() };
+        let slots: Vec<Slot> = [5, 6, 11, 12, 18, 19, 23].into_iter().map(|hour| settings.slot(hour)).collect();
+        use Slot::*;
+        assert_eq!(slots, [Night, Morning, Morning, Afternoon, Afternoon, Night, Night]);
+    }
+
+    #[test]
+    fn times_of_day_count_only_while_that_option_is_on() {
+        let mut screen = ScreenSettings { collection: ALL_ID.into(), morning: "c1".into(), ..ScreenSettings::default() };
+        assert_eq!(screen.collection_for(Slot::Morning), ALL_ID);
+        assert!(!screen.uses("c1"));
+        screen.by_time = true;
+        assert_eq!(screen.collection_for(Slot::Morning), "c1");
+        assert!(screen.uses("c1"));
+    }
+
+    #[test]
+    fn deleting_a_collection_leaves_no_screen_pointing_at_it() {
+        let mut settings =
+            Settings { collections: vec![collection(ALL_ID), collection("c1"), collection("c2")], ..Settings::default() };
+        // c1 as the morning collection of a screen with times of day off,
+        // and as the collection of another one
+        settings.screens.insert("left".into(), ScreenSettings { morning: "c1".into(), ..ScreenSettings::default() });
+        settings.screens.insert("right".into(), ScreenSettings { collection: "c1".into(), ..ScreenSettings::default() });
+
+        assert_eq!(settings.forget_collection("c1"), ["right"]);
+        assert!(settings.collection("c1").is_none());
+        for screen in settings.screens.values() {
+            for field in [&screen.collection, &screen.morning, &screen.afternoon, &screen.night] {
+                assert_eq!(field, ALL_ID);
+            }
+        }
+    }
+
+    #[test]
+    fn without_all_my_wallpapers_the_first_collection_left_takes_over() {
+        let mut settings = Settings { collections: vec![collection("c1"), collection("c2")], ..Settings::default() };
+        settings.screens.insert("main".into(), ScreenSettings { collection: "c1".into(), ..ScreenSettings::default() });
+        settings.forget_collection("c1");
+        assert_eq!(settings.screens["main"].collection, "c2");
+    }
+
+    #[test]
+    fn a_new_collection_takes_the_first_free_id() {
+        let settings =
+            Settings { collections: vec![collection(ALL_ID), collection("c1"), collection("c3")], ..Settings::default() };
+        assert_eq!(settings.new_collection_id(), "c2");
+    }
+
+    #[test]
+    fn a_new_wallpaper_after_going_back_drops_the_ones_ahead() {
+        let mut screen = ScreenState::default();
+        for source in ["a", "b", "c"] {
+            screen.push(shown(source), 1);
+        }
+        screen.pos = 0; // "Previous" twice
+        screen.push(shown("d"), 1);
+        let sources: Vec<&str> = screen.history.iter().map(|s| s.sources[0].as_str()).collect();
+        assert_eq!(sources, ["a", "d"]);
+        assert_eq!(screen.pos, 1);
+    }
+
+    #[test]
+    fn the_history_keeps_only_the_latest_wallpapers() {
+        let mut screen = ScreenState::default();
+        for n in 0..HISTORY + 5 {
+            screen.push(shown(&n.to_string()), 1);
+        }
+        assert_eq!(screen.history.len(), HISTORY);
+        assert_eq!(screen.history[0].sources[0], "5");
+        assert_eq!(screen.pos, HISTORY - 1);
+    }
+
+    #[test]
+    fn names_everwall_gave_itself_follow_the_language() {
+        let all = Collection { id: ALL_ID.into(), name: ALL_NAME.into(), folders: Vec::new(), recursive: true };
+        let mut settings = Settings { collections: vec![all, collection("Trips")], ..Settings::default() };
+        settings.language = "es".into();
+        assert_eq!(settings.collection_name(ALL_ID), "Todos mis fondos");
+        assert_eq!(settings.collection_name("Trips"), "Carpeta Trips");
+        assert_eq!(settings.collection_name(FAVORITES_ID), "Favoritos");
+        settings.language = "en".into();
+        assert_eq!(settings.collection_name(ALL_ID), ALL_NAME);
+        assert_eq!(settings.collection_name("Trips"), "Folder Trips");
     }
 }

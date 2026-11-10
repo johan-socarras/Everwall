@@ -282,3 +282,15 @@ pub fn reveal(path: &str) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_same_shortcut_written_two_ways_is_the_same_key() {
+        assert_eq!(normalize("<Shift><Control><Alt>Left"), normalize("<Ctrl><Alt><Shift>left"));
+        assert_ne!(normalize("<Super><Control><Alt>Left"), normalize("<Control><Alt><Shift>Left"));
+        assert_eq!(normalize("<Super>"), "");
+    }
+}

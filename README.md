@@ -142,6 +142,12 @@ own part.
 A second launch does not start another copy: it hands its order to the one
 already running.
 
+`cargo test` in `src-tauri/` runs the unit tests: when an image fills the
+screen and when it goes over a blurred copy, the exact size of every layout,
+the times of day, the history behind "Previous" and what deleting a
+collection does to the screens that used it. CI runs them, with clippy and a
+release build, on Ubuntu and Windows for every push.
+
 ## Build from source
 
 ### Windows

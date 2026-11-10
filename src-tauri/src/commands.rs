@@ -2,7 +2,7 @@
 //! state; anything that changes a wallpaper goes to the engine thread.
 
 use crate::engine::{self, Cmd};
-use crate::model::{Collection, ScreenSettings, Settings, ALL_ID, NEW_NAME};
+use crate::model::{Collection, ScreenSettings, Settings, NEW_NAME};
 use crate::{library, render, system, AppCore};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -196,26 +196,7 @@ pub fn delete_collection(app: State<AppCore>, id: String) -> Result<(), String> 
         if sh.settings.collections.len() <= 1 {
             return Err(sh.settings.tr("Tiene que quedar al menos una colección.", "At least one collection has to stay.").into());
         }
-        sh.settings.collections.retain(|c| c.id != id);
-        let fallback = sh
-            .settings
-            .collection(ALL_ID)
-            .map(|c| c.id.clone())
-            .unwrap_or_else(|| sh.settings.collections[0].id.clone());
-        let mut affected = Vec::new();
-        for (screen, ss) in sh.settings.screens.iter_mut() {
-            let used = ss.uses(&id);
-            // All four, including the times of day while that option is off,
-            // so turning it on later never finds a deleted collection.
-            for field in [&mut ss.collection, &mut ss.morning, &mut ss.afternoon, &mut ss.night] {
-                if *field == id {
-                    *field = fallback.clone();
-                }
-            }
-            if used {
-                affected.push(screen.clone());
-            }
-        }
+        let affected = sh.settings.forget_collection(&id);
         sh.save_settings();
         affected
     };
