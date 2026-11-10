@@ -1,6 +1,6 @@
 [package]
 name = "everwall"
-version = "1.0.0"
+version = "1.0.1"
 description = "A different wallpaper on each screen"
 license = "GPL-3.0-only"
 edition = "2021"
