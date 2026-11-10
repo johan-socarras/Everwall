@@ -228,6 +228,24 @@ kbd { font: 12px "Cascadia Mono", Consolas, monospace; padding: 2px 8px; border-
 .bad { color: var(--danger); font-size: 12px; }
 .hidden-list { display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow: auto; }
 
+/* about */
+.about { padding: 22px 24px; display: flex; gap: 22px; align-items: flex-start; }
+.about-icon { width: 72px; height: 72px; flex: none; }
+.about-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.about-text p { margin: 0; }
+.about-name { font-size: 22px; }
+.about-legal { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.selectable, .license-text { user-select: text; cursor: text; }
+.licenses { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.license-text {
+  margin: 0; padding: 14px 16px; max-height: min(420px, 55vh); overflow: auto;
+  background: var(--card-2); border: 1px solid var(--line); border-radius: 6px; outline: none;
+  font: 12px/1.5 "Cascadia Mono", Consolas, ui-monospace, monospace;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.license-text:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+
 .toast {
   position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
   background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 6px; font-size: 13px;
@@ -245,4 +263,5 @@ kbd { font: 12px "Cascadia Mono", Consolas, monospace; padding: 2px 8px; border-
   .nav-foot { display: none; }
   main { padding: 18px 16px 32px; }
   .slots { grid-template-columns: 1fr; }
+  .about { flex-direction: column; }
 }

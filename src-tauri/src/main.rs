@@ -104,6 +104,7 @@ fn main() {
             commands::reveal,
             commands::pause,
             commands::restore_original,
+            commands::about,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

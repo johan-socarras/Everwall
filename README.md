@@ -218,4 +218,5 @@ keep this license and come with its source code.
 The libraries Everwall is built with, and Microsoft's WebView2 loader in the
 Windows package, keep their own licenses: see
 [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt), which both release
-packages include.
+packages include. The settings window shows both texts under About: they are
+built into the program, so an installed copy carries them too.
