@@ -16,9 +16,9 @@
   <img alt="Runs on Windows 11 and Ubuntu (GNOME)" src="https://img.shields.io/badge/runs%20on-Windows%2011%20%7C%20Ubuntu%20(GNOME)-2bb3ff">
 </p>
 
-![Three screens with wallpapers placed by Everwall: a portrait photo fills a portrait screen, three portrait photos form a triptych on a wide screen, and a square photo sits whole over a blurred copy of itself](docs/hero.jpg)
+![Three screens with wallpapers placed by Everwall: a portrait image fills a portrait screen, three portrait images form a triptych on a wide screen, and a square image sits whole over a blurred copy of itself](docs/hero.jpg)
 
-<p align="center"><sub>Photos: NASA, public domain (the Artemis I launch by Joel Kowsky, the Earth by the Apollo 17 crew).</sub></p>
+<p align="center"><sub>The sample wallpapers were generated with AI for this page.</sub></p>
 
 Windows can show a slideshow, but it picks images blindly: a portrait photo on
 a landscape monitor ends up cropped or letterboxed, and a rotated monitor gets
