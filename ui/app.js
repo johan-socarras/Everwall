@@ -75,6 +75,13 @@ function h(tag, attrs, ...kids) {
     if (v == null || v === false) continue;
     if (k === 'class') el.className = v;
     else if (k === 'svg') el.innerHTML = v;
+    // property by property: the window's CSP blocks style attributes
+    else if (k === 'style') {
+      for (const rule of v.split(';')) {
+        const colon = rule.indexOf(':');
+        if (colon > 0) el.style.setProperty(rule.slice(0, colon).trim(), rule.slice(colon + 1).trim());
+      }
+    }
     else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
     else if (k in el && typeof v !== 'string') el[k] = v;
     else el.setAttribute(k, v === true ? '' : v);
