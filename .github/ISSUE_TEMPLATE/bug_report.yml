@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in Everwall does not work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting it. The system, the screens and the diagnostics below are what make a problem reproducible.
+
+  - type: input
+    id: version
+    attributes:
+      label: Everwall version
+      description: The release you downloaded, or the commit you built.
+      placeholder: 1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - Windows 11
+        - Ubuntu (GNOME)
+        - Something else (say which below)
+    validations:
+      required: true
+
+  - type: input
+    id: system-version
+    attributes:
+      label: System version
+      description: The Windows version (run `winver`), or the Ubuntu and GNOME versions.
+      placeholder: Windows 11 24H2, or Ubuntu 26.04 with GNOME 50
+
+  - type: textarea
+    id: screens
+    attributes:
+      label: Screens
+      description: How many, their resolutions and which ones are rotated.
+      placeholder: Three screens, a 1080x1920 portrait one on the left and two 1920x1080 ones.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened, and what you expected
+      description: The steps that lead to it, if you know them.
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: |
+        In the app's folder, run `.\Everwall.exe --diagnostics out.txt` (Windows) or `everwall --diagnostics out.txt` (Ubuntu) and paste `out.txt`. It lists your screens and the folders of your collections: remove anything you would rather not post.
+      render: text
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: The last lines of `%LOCALAPPDATA%\Everwall\everwall.log` (Windows) or `~/.local/share/Everwall/everwall.log` (Ubuntu).
+      render: text
