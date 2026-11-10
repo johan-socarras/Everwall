@@ -181,6 +181,7 @@ async function refresh() {
   renderScreens();
   renderCollections();
   renderGeneral();
+  renderAbout();
 }
 
 function renderFoot() {
@@ -583,12 +584,48 @@ function renderGeneral() {
   );
 }
 
+/* ---------- About ---------- */
+
+// Asked once, the first time the page is shown: the version and both license
+// texts, which the app carries inside it. null when there is no answer (the
+// README's screenshot page answers null to what it does not know).
+let about;
+let openLicense = null;
+
+async function loadAbout() {
+  if (about !== undefined) return;
+  about = null;
+  try {
+    about = await invoke('about');
+  } catch {
+    about = null;
+  }
+  renderAbout();
+}
+
+function renderAbout() {
+  const version = $('about-version');
+  version.textContent = about && about.version ? `${tr('Versión', 'Version')} ${about.version}` : '';
+  version.hidden = !version.textContent;
+  for (const b of document.querySelectorAll('[data-license]')) b.setAttribute('aria-pressed', String(b.dataset.license === openLicense));
+  // replaced only when another text opens, so a refresh keeps the scroll and the selection
+  const box = $('license-text');
+  const text = (about && openLicense && about[openLicense]) || '';
+  if (box.dataset.shows !== (text ? openLicense : '')) {
+    box.textContent = text;
+    box.dataset.shows = text ? openLicense : '';
+    box.scrollTop = 0;
+  }
+  box.hidden = !text;
+}
+
 /* ---------- Start ---------- */
 
 function show(next) {
   view = next;
   for (const b of document.querySelectorAll('.nav-item')) b.classList.toggle('active', b.dataset.view === next);
   for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== `v-${next}`;
+  if (next === 'about') loadAbout();
   if (!S) return;
   if (next === 'screens') renderMap();
   if (next === 'collections') {
@@ -598,6 +635,16 @@ function show(next) {
 }
 
 for (const b of document.querySelectorAll('.nav-item')) b.addEventListener('click', () => show(b.dataset.view));
+// each button opens its text below them, scrolled into view; pressed again, it closes it
+for (const b of document.querySelectorAll('[data-license]')) {
+  b.addEventListener('click', () => {
+    const key = b.dataset.license;
+    if (!about || !about[key]) return;
+    openLicense = openLicense === key ? null : key;
+    renderAbout();
+    if (openLicense) $('license-text').scrollIntoView({ block: 'nearest' });
+  });
+}
 $('pause').addEventListener('change', (e) => act('pause', { on: e.target.checked }));
 $('next-all').addEventListener('click', () => act('next', { id: null }));
 $('new-collection').addEventListener('click', async () => {
@@ -643,6 +690,11 @@ function demoInvoke(command, args) {
     case 'favorite':
       for (const p of D.screens) for (const f of (p.current ? p.current.sources : [])) if (f.path === args.path) f.favorite = args.on;
       return done();
+    case 'about': return done({
+      version: '0.0.0',
+      license: 'GNU GENERAL PUBLIC LICENSE\nVersion 3, 29 June 2007\n\n(Sample: the app shows the whole of LICENSE here.)',
+      third_party: '(Sample: the app shows the whole of THIRD-PARTY-LICENSES.txt here.)',
+    });
     default: return done();
   }
 }

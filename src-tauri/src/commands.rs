@@ -42,6 +42,22 @@ fn file_name(path: &str) -> String {
     Path::new(path).file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| path.to_string())
 }
 
+// Built into the program, so a copy installed by copying just the executable
+// still carries its license and the licenses of the libraries inside it.
+const LICENSE: &str = include_str!("../../LICENSE");
+const THIRD_PARTY_LICENSES: &str = include_str!("../../THIRD-PARTY-LICENSES.txt");
+
+/// What the About page shows: the version of the Tauri package and both
+/// license texts, as they are.
+#[tauri::command]
+pub fn about(app: AppHandle) -> Value {
+    json!({
+        "version": app.package_info().version.to_string(),
+        "license": LICENSE,
+        "third_party": THIRD_PARTY_LICENSES,
+    })
+}
+
 #[tauri::command]
 pub fn state(app: State<AppCore>) -> Value {
     let mut sh = app.core.lock().unwrap();
