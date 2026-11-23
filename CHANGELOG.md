@@ -19,6 +19,8 @@ follow [Semantic Versioning](https://semver.org/).
   GNOME redrew the desktop. Everwall now waits for the GNOME session to settle
   before its first change, and keeps the wallpaper already set when it is its
   own and the screens have not moved.
+- Ubuntu: a keyboard shortcut, like any other second launch, also opened the
+  settings window. It now does only what was asked.
 - Ubuntu: `install.sh` builds first and only then closes the running Everwall,
   so a long or failed build no longer leaves it closed.
 - Settings or state that could not be saved, and diagnostics that could not be

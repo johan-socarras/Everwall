@@ -116,7 +116,12 @@ pub fn listen_orders(on_order: impl Fn(String) + Send + 'static) {
         for stream in listener.incoming().flatten() {
             let mut text = String::new();
             let _ = stream.take(256).read_to_string(&mut text);
-            on_order(text.trim().to_string());
+            // claim_single_instance of a second launch connects and says
+            // nothing: that is a question, not an order
+            let order = text.trim();
+            if !order.is_empty() {
+                on_order(order.to_string());
+            }
         }
     });
 }
