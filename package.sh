@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds Everwall and packs the Linux tar.gz attached to each GitHub release:
-# the everwall program, its icon, install.sh, its licence and the licences of
+# the everwall program, its icon, install.sh, its license and the licenses of
 # the libraries built into it (THIRD-PARTY-LICENSES.txt).
 #   ./package.sh             build and pack
 #   ./package.sh --no-build  pack the last build

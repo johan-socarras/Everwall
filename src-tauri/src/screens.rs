@@ -3,7 +3,6 @@
 //! screens' images are joined into one wide picture.
 
 use crate::render::Area;
-use serde::Serialize;
 
 #[cfg(windows)]
 mod win;
@@ -15,7 +14,7 @@ mod linux;
 #[cfg(target_os = "linux")]
 pub use linux::*;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug)]
 pub struct Screen {
     pub id: String,
     pub name: String,
@@ -23,7 +22,6 @@ pub struct Screen {
     pub y: i32,
     pub w: u32,
     pub h: u32,
-    #[serde(skip)]
     pub area: Area,
     pub primary: bool,
 }

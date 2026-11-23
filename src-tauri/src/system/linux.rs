@@ -4,7 +4,7 @@
 //! shortcuts that run `everwall --shortcut N`), the folder picker (zenity) and
 //! showing a file in the file manager.
 
-use super::{LocalTime, HOTKEYS};
+use super::{from_cargo, LocalTime, HOTKEYS};
 use crate::{gnome, model};
 use gio::glib::{self, ToVariant, Variant};
 use gio::prelude::*;
@@ -46,12 +46,6 @@ pub fn system_language() -> &'static str {
     } else {
         "en"
     }
-}
-
-/// A build straight out of a cargo target folder (it has `.fingerprint`
-/// beside it) must not end up starting with the session or behind a shortcut.
-fn from_cargo(exe: &Path) -> bool {
-    exe.parent().map(|dir| dir.join(".fingerprint").is_dir()).unwrap_or(false)
 }
 
 fn autostart_file() -> Option<PathBuf> {

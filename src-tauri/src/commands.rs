@@ -2,7 +2,7 @@
 //! state; anything that changes a wallpaper goes to the engine thread.
 
 use crate::engine::{self, Cmd};
-use crate::model::{Collection, ScreenSettings, Settings, NEW_NAME};
+use crate::model::{Collection, ScreenSettings, Settings, FAVORITES_ID, NEW_NAME};
 use crate::{library, render, system, AppCore};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -11,7 +11,7 @@ use tauri::{AppHandle, Manager, State, WebviewWindow};
 
 #[derive(Serialize, Deserialize)]
 pub struct General {
-    pub start_with_windows: bool,
+    pub start_with_system: bool,
     pub pause_fullscreen: bool,
     pub accent: bool,
     pub accent_screen: String,
@@ -25,7 +25,7 @@ pub struct General {
 impl From<&Settings> for General {
     fn from(s: &Settings) -> Self {
         Self {
-            start_with_windows: s.start_with_windows,
+            start_with_system: s.start_with_system,
             pause_fullscreen: s.pause_fullscreen,
             accent: s.accent,
             accent_screen: s.accent_screen.clone(),
@@ -93,9 +93,21 @@ pub fn state(app: State<AppCore>) -> Value {
         .collect();
     // which shortcuts the system accepted, in order; the window names them
     let hotkeys: Vec<bool> = (0..system::HOTKEYS.len()).map(|i| sh.hotkeys.get(i).copied().unwrap_or(false)).collect();
+    // each collection with its name in the window's language (label)
+    let collections: Vec<Value> = sh
+        .settings
+        .collections
+        .iter()
+        .map(|c| {
+            let mut value = json!(c);
+            value["label"] = json!(sh.settings.collection_name(&c.id));
+            value
+        })
+        .collect();
     json!({
         "screens": screens,
-        "collections": sh.settings.collections,
+        "collections": collections,
+        "favorites_label": sh.settings.collection_name(FAVORITES_ID),
         "general": General::from(&sh.settings),
         "hotkeys": hotkeys,
         "hidden": sh.state.hidden,
@@ -131,7 +143,7 @@ pub fn save_general(handle: AppHandle, general: General) {
         let mut sh = app.core.lock().unwrap();
         let s = &mut sh.settings;
         let before = (s.accent, s.accent_screen.clone());
-        s.start_with_windows = general.start_with_windows;
+        s.start_with_system = general.start_with_system;
         s.pause_fullscreen = general.pause_fullscreen;
         s.accent = general.accent;
         s.accent_screen = general.accent_screen.clone();
@@ -151,7 +163,7 @@ pub fn save_general(handle: AppHandle, general: General) {
         sh.save_settings();
         changed
     };
-    system::set_startup(general.start_with_windows);
+    system::set_startup(general.start_with_system);
     crate::sync_tray(&handle);
     if accent_changed {
         app.send(Cmd::Accent);

@@ -131,8 +131,10 @@ impl ScreenSettings {
 pub struct Settings {
     pub collections: Vec<Collection>,
     pub screens: BTreeMap<String, ScreenSettings>,
-    /// Start with the session (the name stays for the settings already saved).
-    pub start_with_windows: bool,
+    /// Start with Windows or with the GNOME session. The alias reads the
+    /// settings.json of Everwall 1.0.0, which names it start_with_windows.
+    #[serde(alias = "start_with_windows")]
+    pub start_with_system: bool,
     /// Off by default on Linux: GNOME does not say what is full screen, only
     /// that something asked to keep the screen on, and some apps ask all the
     /// time, which would stop every automatic change.
@@ -156,7 +158,7 @@ impl Default for Settings {
         Self {
             collections: Vec::new(),
             screens: BTreeMap::new(),
-            start_with_windows: true,
+            start_with_system: true,
             pause_fullscreen: cfg!(windows),
             accent: true,
             accent_screen: String::new(),
@@ -366,12 +368,13 @@ pub fn load<T: for<'de> Deserialize<'de>>(name: &str) -> Option<T> {
 /// Writes through a temporary file so a crash never leaves half a JSON.
 pub fn save<T: Serialize>(name: &str, value: &T) {
     let dir = data_dir();
-    let _ = std::fs::create_dir_all(&dir);
     let tmp = dir.join(format!("{name}.tmp"));
-    if let Ok(text) = serde_json::to_string_pretty(value) {
-        if std::fs::write(&tmp, text).is_ok() {
-            let _ = std::fs::rename(&tmp, dir.join(name));
-        }
+    let saved = std::fs::create_dir_all(&dir)
+        .and_then(|_| serde_json::to_string_pretty(value).map_err(std::io::Error::other))
+        .and_then(|text| std::fs::write(&tmp, text))
+        .and_then(|_| std::fs::rename(&tmp, dir.join(name)));
+    if let Err(error) = saved {
+        log(&format!("could not save {name}: {error}"));
     }
 }
 
@@ -476,6 +479,14 @@ mod tests {
         assert_eq!(screen.history.len(), HISTORY);
         assert_eq!(screen.history[0].sources[0], "5");
         assert_eq!(screen.pos, HISTORY - 1);
+    }
+
+    #[test]
+    fn the_settings_of_1_0_0_keep_their_start_option() {
+        let old: Settings = serde_json::from_str(r#"{"start_with_windows": false}"#).unwrap();
+        assert!(!old.start_with_system);
+        let new: Settings = serde_json::from_str(r#"{"start_with_system": false}"#).unwrap();
+        assert!(!new.start_with_system);
     }
 
     #[test]

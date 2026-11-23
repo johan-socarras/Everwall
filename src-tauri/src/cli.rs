@@ -62,7 +62,10 @@ pub fn diagnostics(out: Option<String>) {
     let _ = writeln!(r, "Data in {}", model::data_dir().display());
     let path = out.map(PathBuf::from).unwrap_or_else(|| model::data_dir().join("diagnostics.txt"));
     let _ = std::fs::create_dir_all(model::data_dir());
-    let _ = std::fs::write(path, r);
+    // there is no console to tell (on Windows): the log says it
+    if let Err(error) = std::fs::write(&path, r) {
+        model::log(&format!("could not write the diagnostics to {}: {error}", path.display()));
+    }
 }
 
 #[cfg(target_os = "linux")]

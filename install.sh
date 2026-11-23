@@ -17,13 +17,16 @@ icon="$HOME/.local/share/icons/hicolor/256x256/apps/everwall.png"
 entry="$HOME/.local/share/applications/everwall.desktop"
 
 running=false
-if pgrep -x everwall > /dev/null; then
-    running=true
-    pkill -x everwall
-    sleep 0.8
-fi
+stop_running() {
+    if pgrep -x everwall > /dev/null; then
+        running=true
+        pkill -x everwall
+        sleep 0.8
+    fi
+}
 
 if [[ "${1:-}" == "--uninstall" ]]; then
+    stop_running
     [[ -x "$bin" ]] && "$bin" --uninstall
     rm -f "$bin" "$icon" "$entry"
     echo "Everwall removed. Its settings stay in ~/.local/share/Everwall."
@@ -42,6 +45,8 @@ else
     source_icon="$here/everwall.png"
 fi
 
+# only now, so a long or failed build leaves the running copy alone
+stop_running
 install -Dm755 "$source" "$bin"
 install -Dm644 "$source_icon" "$icon"
 mkdir -p "$(dirname "$entry")"

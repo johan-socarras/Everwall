@@ -1,5 +1,5 @@
 //! Drawing the final wallpaper at the exact pixel size of each screen, so
-//! Windows never has to stretch or crop it:
+//! the system never has to stretch or crop it:
 //! - Fill: one image covering the screen (cropped to its shape).
 //! - Blur: the whole image centred over a blurred, darkened copy of itself.
 //! - Triptych: three images of the other shape over a blurred background:

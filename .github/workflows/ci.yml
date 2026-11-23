@@ -1,9 +1,8 @@
 # Lints, tests and builds Everwall on every push to main and every pull
-# request: clippy with warnings as errors, the unit tests and a release
-# build, on Ubuntu (the
-# libraries Tauri builds against come from apt) and on Windows (the runner's
-# default MSVC toolchain; the published zip is built with the GNU one, as the
-# README describes).
+# request: clippy with warnings as errors, the unit tests and a release build,
+# on Ubuntu (the libraries Tauri builds against come from apt) and on Windows
+# (the runner's default MSVC toolchain; the published zip is built with the
+# GNU one, as the README describes).
 name: CI
 
 on:
@@ -48,8 +47,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
 
-      # The toolchain Everwall 1.0 was linted with: newer clippy releases add
-      # lints, so it is raised on purpose, not by surprise.
+      # Pinned: newer clippy releases add lints, so the toolchain is raised on
+      # purpose, not by surprise.
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: '1.99'

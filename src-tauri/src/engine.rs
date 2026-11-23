@@ -133,6 +133,9 @@ struct Engine {
 }
 
 const TICK: Duration = Duration::from_secs(20);
+/// The most of an image that cropping it to the screen's shape may lose;
+/// past that it goes whole over a blurred copy.
+const MAX_CROP_LOSS: f64 = 0.30;
 
 impl Engine {
     fn start(&mut self) {
@@ -386,7 +389,7 @@ impl Engine {
         let matching: Vec<&ImageInfo> = pool.iter().filter(|i| i.portrait() != screen.landscape()).collect();
         let opposite: Vec<&ImageInfo> = pool.iter().filter(|i| i.portrait() == screen.landscape()).collect();
         let screen_ratio = screen.w as f64 / screen.h as f64;
-        let fits = |i: &ImageInfo| crop_loss(i.ratio(), screen_ratio) <= 0.30;
+        let fits = |i: &ImageInfo| crop_loss(i.ratio(), screen_ratio) <= MAX_CROP_LOSS;
         match ss.fit {
             Fit::Triptych if opposite.len() >= 3 => {
                 let middle = self.pick(&opposite, picks, &BTreeSet::new()).clone();
@@ -779,9 +782,9 @@ mod tests {
         let wide = 16.0 / 9.0;
         assert!(crop_loss(wide, wide).abs() < 1e-9);
         // a 3:2 photo on a 16:9 screen loses 15.6 %: it fills the screen
-        assert!(crop_loss(1.5, wide) <= 0.30);
+        assert!(crop_loss(1.5, wide) <= MAX_CROP_LOSS);
         // a square one would lose 43.75 %: whole, over a blurred copy
-        assert!(crop_loss(1.0, wide) > 0.30);
+        assert!(crop_loss(1.0, wide) > MAX_CROP_LOSS);
         // the same loss whichever shape is the wider one
         assert!((crop_loss(9.0 / 16.0, 0.5) - crop_loss(0.5, 9.0 / 16.0)).abs() < 1e-12);
     }

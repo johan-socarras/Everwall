@@ -1,5 +1,5 @@
 # Builds Everwall and packs the zip attached to each GitHub release:
-# Everwall.exe, WebView2Loader.dll, its licence and the licences of the
+# Everwall.exe, WebView2Loader.dll, its license and the licenses of the
 # libraries built into it (THIRD-PARTY-LICENSES.txt), ready to unzip and run.
 #   pwsh -File package.ps1            build and pack
 #   pwsh -File package.ps1 -NoBuild   pack the last build

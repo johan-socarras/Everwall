@@ -26,6 +26,16 @@ pub struct LocalTime {
     pub stamp: String,
 }
 
-/// Ids of the four shortcuts: next, back, favourite, hide. The window names
-/// the keys in its own language.
-pub const HOTKEYS: [i32; 4] = [1, 2, 3, 4];
+/// Ids of the four shortcuts, in the order of HOTKEYS. The window names the
+/// keys in its own language.
+pub const NEXT: i32 = 1;
+pub const PREVIOUS: i32 = 2;
+pub const FAVORITE: i32 = 3;
+pub const HIDE: i32 = 4;
+pub const HOTKEYS: [i32; 4] = [NEXT, PREVIOUS, FAVORITE, HIDE];
+
+/// A build straight out of a cargo target folder (it has `.fingerprint`
+/// beside it) must not end up starting with the system or behind a shortcut.
+fn from_cargo(exe: &std::path::Path) -> bool {
+    exe.parent().map(|dir| dir.join(".fingerprint").is_dir()).unwrap_or(false)
+}

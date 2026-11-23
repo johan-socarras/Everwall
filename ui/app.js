@@ -123,18 +123,12 @@ function toast(message) {
   toast.timer = setTimeout(() => { t.hidden = true; }, 2800);
 }
 
-// The collections Everwall created itself keep their English names on disk;
-// shown in Spanish while the user has not renamed them.
-function displayName(c) {
-  if (LANG === 'en') return c.name;
-  if (c.id === 'all' && c.name === 'All my wallpapers') return 'Todos mis fondos';
-  if (c.name === 'New collection') return 'Colección nueva';
-  const folder = /^Folder (.+)$/.exec(c.name);
-  return folder ? `Carpeta ${folder[1]}` : c.name;
-}
+// The app sends each collection's name in the window's language (label): the
+// names Everwall gave itself are kept in English and translated there.
+const displayName = (c) => c.label || c.name;
 
 function collName(id) {
-  if (id === 'favorites') return tr('★ Favoritos', '★ Favourites');
+  if (id === 'favorites') return `★ ${S.favorites_label}`;
   const c = S.collections.find((x) => x.id === id);
   return c ? displayName(c) : id;
 }
@@ -517,7 +511,7 @@ function renderGeneral() {
         h('option', { value: 'es', selected: g.language !== 'en' }, 'Español'),
         h('option', { value: 'en', selected: g.language === 'en' }, 'English')))),
     h('div', { class: 'card' }, h('h2', {}, tr('Funcionamiento', 'Behaviour')),
-      switchRow(LINUX() ? tr('Arrancar al iniciar sesión', 'Start when I log in') : tr('Arrancar con Windows', 'Start with Windows'), g.start_with_windows, (on) => { g.start_with_windows = on; save(); },
+      switchRow(LINUX() ? tr('Arrancar al iniciar sesión', 'Start when I log in') : tr('Arrancar con Windows', 'Start with Windows'), g.start_with_system, (on) => { g.start_with_system = on; save(); },
         tr('Everwall se queda junto al reloj y cambia los fondos aunque esta ventana esté cerrada.',
           'Everwall stays by the clock and changes wallpapers even with this window closed.')),
       switchRow(tr('Esperar si hay un juego o un vídeo a pantalla completa', 'Wait while a game or video is full screen'), g.pause_fullscreen, (on) => { g.pause_fullscreen = on; save(); },
@@ -587,8 +581,7 @@ function renderGeneral() {
 /* ---------- About ---------- */
 
 // Asked once, the first time the page is shown: the version and both license
-// texts, which the app carries inside it. null when there is no answer (the
-// README's screenshot page answers null to what it does not know).
+// texts, which the app carries inside it. null when the app does not answer.
 let about;
 let openLicense = null;
 
@@ -670,20 +663,27 @@ function demoInvoke(command, args) {
   const D = demoInvoke.data || (demoInvoke.data = demoData());
   const done = (value = null) => Promise.resolve(value);
   switch (command) {
-    case 'state': return done(JSON.parse(JSON.stringify(D)));
+    case 'state': {
+      // what the app does: its own names follow the language until renamed
+      const state = JSON.parse(JSON.stringify(D));
+      const en = state.general.language === 'en';
+      for (const c of state.collections) c.label = c.names && c.name === c.names[1] ? c.names[en ? 1 : 0] : c.name;
+      state.favorites_label = en ? 'Favourites' : 'Favoritos';
+      return done(state);
+    }
     case 'count': return done({ total: 95, portrait: 57, landscape: 38 });
     case 'thumbnail': return done(demoGradient(52, 72, 3));
     case 'save_screen': D.screens.find((p) => p.id === args.id).settings = args.settings; return done();
     case 'save_general': D.general = args.general; return done();
     case 'pause': D.paused = args.on; return done();
     case 'new_collection': {
-      const c = { id: `c${D.collections.length + 1}`, name: 'New collection', folders: [], recursive: true };
+      const c = { id: `c${D.collections.length + 1}`, name: 'New collection', names: ['Colección nueva', 'New collection'], folders: [], recursive: true };
       D.collections.push(c);
       return done(c);
     }
     case 'save_collection': {
       const i = D.collections.findIndex((c) => c.id === args.collection.id);
-      D.collections[i] = args.collection;
+      D.collections[i] = { ...args.collection, names: D.collections[i].names };
       return done();
     }
     case 'delete_collection': D.collections = D.collections.filter((c) => c.id !== args.id); return done();
@@ -726,12 +726,10 @@ function demoData() {
         current: { layout: 'blur', sources: [source(9, false)], mini: demoGradient(192, 108, 4) } },
     ],
     collections: [
-      { id: 'all', name: 'All my wallpapers', folders: [folder], recursive: true },
-      { id: 'c1', name: 'Folder 1', folders: [`${folder}\\1`], recursive: true },
-      { id: 'c2', name: 'Folder 2', folders: [`${folder}\\2`], recursive: true },
-      { id: 'c3', name: 'Folder 3', folders: [`${folder}\\3`], recursive: true },
+      { id: 'all', name: 'All my wallpapers', names: ['Todos mis fondos', 'All my wallpapers'], folders: [folder], recursive: true },
+      ...[1, 2, 3].map((n) => ({ id: `c${n}`, name: `Folder ${n}`, names: [`Carpeta ${n}`, `Folder ${n}`], folders: [`${folder}\\${n}`], recursive: true })),
     ],
-    general: { start_with_windows: true, pause_fullscreen: true, accent: true, accent_screen: '', accent_every: 3, morning_from: 6, afternoon_from: 12, night_from: 19,
+    general: { start_with_system: true, pause_fullscreen: true, accent: true, accent_screen: '', accent_every: 3, morning_from: 6, afternoon_from: 12, night_from: 19,
       language: new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'es' },
     hotkeys: [true, true, true, true],
     hidden: [],

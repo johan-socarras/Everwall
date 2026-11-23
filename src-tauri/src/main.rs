@@ -25,12 +25,12 @@ use tauri::{AppHandle, Emitter, Manager, RunEvent, WebviewUrl, WebviewWindowBuil
 pub struct AppCore {
     pub core: engine::Core,
     pub index: engine::Index,
-    tx: Mutex<Sender<Cmd>>,
+    tx: Sender<Cmd>,
 }
 
 impl AppCore {
     pub fn send(&self, cmd: Cmd) {
-        let _ = self.tx.lock().unwrap().send(cmd);
+        let _ = self.tx.send(cmd);
     }
 }
 
@@ -115,19 +115,19 @@ fn main() {
                 let _ = notify_handle.emit("changed", ());
                 sync_tray(&notify_handle);
             });
-            app.manage(AppCore { core: core.clone(), index, tx: Mutex::new(tx) });
+            app.manage(AppCore { core: core.clone(), index, tx });
             build_tray(app)?;
 
             let hotkey_handle = handle.clone();
             let english = core.lock().unwrap().settings.language == "en";
             let hotkeys = system::start_hotkeys(english, move |key| on_hotkey(&hotkey_handle, key));
             model::log(&format!("shortcuts registered: {hotkeys:?}"));
-            let start_with_windows = {
+            let start_with_system = {
                 let mut sh = core.lock().unwrap();
                 sh.hotkeys = hotkeys;
-                sh.settings.start_with_windows
+                sh.settings.start_with_system
             };
-            if start_with_windows {
+            if start_with_system {
                 system::set_startup(true);
             }
             let order_handle = handle.clone();
@@ -279,15 +279,15 @@ fn on_hotkey(app: &AppHandle, key: i32) {
     };
     let Some((id, single)) = target else { return };
     match (key, single) {
-        (1, _) => core.send(Cmd::Next(Some(id))),
-        (2, _) => core.send(Cmd::Prev(id)),
-        (3, Some(path)) => {
+        (system::NEXT, _) => core.send(Cmd::Next(Some(id))),
+        (system::PREVIOUS, _) => core.send(Cmd::Prev(id)),
+        (system::FAVORITE, Some(path)) => {
             commands::set_favorite(&core, &path, None);
             let _ = app.emit("changed", ());
         }
-        (4, Some(path)) => commands::hide_image(&core, &path),
+        (system::HIDE, Some(path)) => commands::hide_image(&core, &path),
         // a triptych: which of the three? The user picks in the window
-        (3 | 4, None) => open_from_thread(app, Some(id)),
+        (system::FAVORITE | system::HIDE, None) => open_from_thread(app, Some(id)),
         _ => {}
     }
 }

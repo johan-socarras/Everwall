@@ -66,8 +66,9 @@ fn reg_type(kind: u32) -> RegType {
     }
 }
 
-/// Writes the accent palette built around `rgb`: three lighter shades, the
-/// accent itself, three darker ones (Windows' own layout of AccentPalette).
+/// Writes the accent palette built around `rgb`: eight colours, three lighter
+/// shades, the accent itself and four darker ones (Windows' own layout of
+/// AccentPalette).
 pub fn apply(rgb: [u8; 3]) -> Result<[u8; 3], String> {
     let (h, s, l) = to_hsl(rgb);
     let s = s.clamp(0.45, 0.85);

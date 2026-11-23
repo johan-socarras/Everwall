@@ -2,7 +2,7 @@
 //! launch passes its order to the first), global hotkeys, the folder picker
 //! and showing a file in Explorer.
 
-use super::{LocalTime, HOTKEYS};
+use super::{from_cargo, LocalTime, HOTKEYS};
 use crate::model;
 use std::time::Duration;
 use windows::core::{w, HSTRING};
@@ -47,14 +47,12 @@ const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 const RUN_NAME: &str = "Everwall";
 
 /// Points the Run entry at this very exe, wherever it was unzipped or
-/// installed; starting a moved copy points it at the new place. A build
-/// straight out of a cargo target folder (it has `.fingerprint` beside it)
-/// must not end up starting with Windows.
+/// installed; starting a moved copy points it at the new place.
 pub fn set_startup(enable: bool) {
     let Ok(exe) = std::env::current_exe() else { return };
-    let from_cargo = exe.parent().map(|dir| dir.join(".fingerprint").is_dir()).unwrap_or(false);
+    let cargo_build = from_cargo(&exe);
     let exe = exe.display().to_string();
-    if from_cargo {
+    if cargo_build {
         model::log(&format!("start with Windows: {exe} is a cargo build, leaving the registry alone"));
         return;
     }

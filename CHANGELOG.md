@@ -19,6 +19,10 @@ follow [Semantic Versioning](https://semver.org/).
   GNOME redrew the desktop. Everwall now waits for the GNOME session to settle
   before its first change, and keeps the wallpaper already set when it is its
   own and the screens have not moved.
+- Ubuntu: `install.sh` builds first and only then closes the running Everwall,
+  so a long or failed build no longer leaves it closed.
+- Settings or state that could not be saved, and diagnostics that could not be
+  written, now say so in the log instead of failing silently.
 
 ## [1.0.0] - 2026-11-10
 
