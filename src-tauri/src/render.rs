@@ -232,8 +232,8 @@ fn shadow(out: &mut RgbImage, x: u32, y: u32, w: u32, h: u32, r: f32, spread: f3
             }
             let k = 1.0 - 0.5 * a;
             let p = out.get_pixel_mut(px as u32, py as u32);
-            for c in 0..3 {
-                p.0[c] = (p.0[c] as f32 * k) as u8;
+            for channel in &mut p.0 {
+                *channel = (*channel as f32 * k) as u8;
             }
         }
     }

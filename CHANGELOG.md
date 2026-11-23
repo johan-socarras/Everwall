@@ -13,6 +13,13 @@ follow [Semantic Versioning](https://semver.org/).
   GPL and of the third-party licenses. Both texts are built into the program,
   so a copy installed by copying only the program carries them too.
 
+### Changed
+
+- Windows: `Everwall.exe` names its publisher and carries the copyright notice
+  in its file properties.
+- `--diagnostics` writes the folders of each collection and the start entry as
+  plain text.
+
 ### Fixed
 
 - Ubuntu: after a restart, every screen but the main one could stay grey until

@@ -135,8 +135,8 @@ fn work_area(rect: &RECT) -> Area {
     Area { x: 0, y: 0, w, h }
 }
 
-/// "HP E202" and friends, keyed by the same device path IDesktopWallpaper
-/// uses as monitor id.
+/// The monitors' own names ("Dell P2422H"), keyed by the same device path
+/// IDesktopWallpaper uses as monitor id.
 fn friendly_names() -> HashMap<String, String> {
     let mut names = HashMap::new();
     unsafe {

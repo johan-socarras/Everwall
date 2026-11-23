@@ -723,11 +723,11 @@ function demoData() {
   const source = (n, fav) => ({ path: `${folder}\\3\\wallpaper-${n}.jpg`, name: `wallpaper-${n}.jpg`, favorite: fav });
   return {
     screens: [
-      { id: 'hp', name: 'HP E202', x: -900, y: -71, w: 900, h: 1600, primary: false, settings: settings('c3', 'auto'), back: true,
+      { id: 'p', name: 'Dell P2422H', x: -1080, y: -420, w: 1080, h: 1920, primary: false, settings: settings('c3', 'auto'), back: true,
         current: { layout: 'fill', sources: [source(7, true)], mini: demoGradient(90, 160, 1) } },
-      { id: 'a', name: '2367', x: 0, y: 0, w: 1920, h: 1080, primary: true, settings: settings('all', 'auto'), back: false,
+      { id: 'a', name: 'Dell P2422H', x: 0, y: 0, w: 1920, h: 1080, primary: true, settings: settings('all', 'auto'), back: false,
         current: { layout: 'triptych', sources: [source(1, false), source(2, true), source(3, false)], mini: demoGradient(192, 108, 2) } },
-      { id: 'b', name: '2367', x: 1920, y: 0, w: 1920, h: 1080, primary: false, settings: settings('c1', 'blur'), back: true,
+      { id: 'b', name: 'Dell P2422H', x: 1920, y: 0, w: 1920, h: 1080, primary: false, settings: settings('c1', 'blur'), back: true,
         current: { layout: 'blur', sources: [source(9, false)], mini: demoGradient(192, 108, 4) } },
     ],
     collections: [

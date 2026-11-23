@@ -23,6 +23,8 @@
   },
   "bundle": {
     "active": false,
+    "publisher": "Johan Socarras",
+    "copyright": "Copyright (C) 2026 Johan Socarras",
     "icon": ["icons/icon.ico", "icons/icon.png"]
   }
 }

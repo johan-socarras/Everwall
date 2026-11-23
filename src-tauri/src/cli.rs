@@ -53,12 +53,12 @@ pub fn diagnostics(out: Option<String>) {
         let portrait = images.iter().filter(|i| i.portrait()).count();
         let _ = writeln!(
             r,
-            "Collection {} \"{}\": {} images ({} portrait, {} landscape) in {:?}",
-            c.id, c.name, images.len(), portrait, images.len() - portrait, c.folders
+            "Collection {} \"{}\": {} images ({} portrait, {} landscape) in {}",
+            c.id, c.name, images.len(), portrait, images.len() - portrait, c.folders.join(" | ")
         );
     }
     let _ = writeln!(r, "Favourites: {} | hidden: {}", state.favorites.len(), state.hidden.len());
-    let _ = writeln!(r, "Start with the system: {:?}", system::startup_value());
+    let _ = writeln!(r, "Start with the system: {}", system::startup_value().as_deref().unwrap_or("no"));
     let _ = writeln!(r, "Data in {}", model::data_dir().display());
     let path = out.map(PathBuf::from).unwrap_or_else(|| model::data_dir().join("diagnostics.txt"));
     let _ = std::fs::create_dir_all(model::data_dir());
