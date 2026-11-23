@@ -131,11 +131,16 @@ def standard_library():
     text = html.unescape(re.sub(r'<[^>]+>', ' ', page[start.end():end.start()]))
     years = None
     for entry in text.split('File/Directory:')[1:]:
-        where = entry.split()[0]
+        where = entry.split('License:')[0].strip() or '(a file with no name)'
         license_id = re.search(r'License:\s*(.+?)\s+Copyright:', entry, re.S).group(1)
-        if license_id == 'Apache-2.0 OR MIT' or 'fuchsia' in where:   # Fuchsia code is not built for these targets
+        if 'fuchsia' in where:   # Fuchsia code is not built for these targets
             continue
-        if license_id == 'Unicode-3.0' and where == 'library/core/src/unicode':
+        # code under the LLVM exception may go into a compiled program without
+        # its notice; what is left of the expression is the library's own license
+        if license_id.replace(' WITH LLVM-exception', '') in ('Apache-2.0 OR MIT', 'Apache-2.0 AND (Apache-2.0 OR MIT)'):
+            continue
+        # the tables, or the folder they are in: toolchains list one or the other
+        if license_id == 'Unicode-3.0' and where.startswith('library/core/src/unicode'):
             years = re.search(r'Copyright:\s*([\d\-]+) Unicode', entry).group(1)
             continue
         sys.exit(f'the standard library now has {where} under {license_id}: add its notice to this script')
