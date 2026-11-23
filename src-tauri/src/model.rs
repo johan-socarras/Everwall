@@ -354,12 +354,17 @@ pub struct State {
     pub slot: Option<Slot>,
 }
 
+/// A file that does not hold what it should is copied to `<name>.unreadable`
+/// first: the defaults that take its place are saved over it.
 pub fn load<T: for<'de> Deserialize<'de>>(name: &str) -> Option<T> {
-    let text = std::fs::read_to_string(data_dir().join(name)).ok()?;
+    let path = data_dir().join(name);
+    let text = std::fs::read_to_string(&path).ok()?;
     match serde_json::from_str(&text) {
         Ok(value) => Some(value),
         Err(error) => {
-            log(&format!("could not read {name} ({error}); using the defaults"));
+            let kept = format!("{name}.unreadable");
+            let _ = std::fs::copy(&path, data_dir().join(&kept));
+            log(&format!("could not read {name} ({error}); using the defaults, the file is kept as {kept}"));
             None
         }
     }

@@ -434,11 +434,16 @@ function renderEditor() {
       h('input', {
         type: 'text', value: displayName(c), maxlength: '60',
         oninput: (e) => {
-          draft.name = e.target.value;
+          // an empty box keeps the name it had: a collection needs one
+          draft.name = e.target.value.trim() || c.name;
           clearTimeout(nameTimer);
           nameTimer = setTimeout(() => invoke('save_collection', { collection: draft }), 400);
         },
-        onblur: () => { clearTimeout(nameTimer); if (draft.name !== c.name) save(false); },
+        onblur: (e) => {
+          clearTimeout(nameTimer);
+          if (draft.name !== c.name) save(false);
+          else e.target.value = displayName(c);
+        },
         onkeydown: (e) => { if (e.key === 'Enter') e.target.blur(); },
       })),
     h('div', { class: 'field' }, h('span', { class: 'label' }, tr('Carpetas', 'Folders')),
