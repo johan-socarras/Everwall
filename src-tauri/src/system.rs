@@ -34,8 +34,26 @@ pub const FAVORITE: i32 = 3;
 pub const HIDE: i32 = 4;
 pub const HOTKEYS: [i32; 4] = [NEXT, PREVIOUS, FAVORITE, HIDE];
 
-/// A build straight out of a cargo target folder (it has `.fingerprint`
-/// beside it) must not end up starting with the system or behind a shortcut.
+/// A build straight out of a cargo target folder (cargo keeps its
+/// `.cargo-lock` beside it) must not end up starting with the system or
+/// behind a shortcut.
 fn from_cargo(exe: &std::path::Path) -> bool {
-    exe.parent().map(|dir| dir.join(".fingerprint").is_dir()).unwrap_or(false)
+    exe.parent().map(|dir| dir.join(".cargo-lock").is_file()).unwrap_or(false)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_program_beside_cargos_lock_is_a_cargo_build() {
+        let dir = std::env::temp_dir().join(format!("everwall-test-{}", std::process::id()));
+        let (release, installed) = (dir.join("release"), dir.join("installed"));
+        std::fs::create_dir_all(&release).unwrap();
+        std::fs::create_dir_all(&installed).unwrap();
+        std::fs::write(release.join(".cargo-lock"), "").unwrap();
+        assert!(from_cargo(&release.join("everwall")));
+        assert!(!from_cargo(&installed.join("everwall")));
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
 }

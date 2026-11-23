@@ -25,6 +25,9 @@ follow [Semantic Versioning](https://semver.org/).
   so a long or failed build no longer leaves it closed.
 - Settings or state that could not be saved, and diagnostics that could not be
   written, now say so in the log instead of failing silently.
+- A build run straight from cargo's target folder is recognised with the
+  layout Cargo 1.100 gives that folder, so it does not set itself to start
+  with the system.
 
 ## [1.0.0] - 2026-11-10
 
