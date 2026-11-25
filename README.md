@@ -26,12 +26,41 @@ images that were never meant for it. GNOME cannot even give each screen its
 own wallpaper. Everwall takes its wallpapers from collections of folders and
 looks at each image and each screen before it decides how to place it.
 
+## Contents
+
+[Download](#download) · [How it places an image](#how-it-places-an-image) ·
+[Features](#features) · [How it is built](#how-it-is-built) ·
+[Build from source](#build-from-source) · [Privacy](#privacy) ·
+[Checking it without changing the wallpaper](#checking-it-without-changing-the-wallpaper) ·
+[Contributors](#contributors) · [License](#license)
+
 ## Download
 
-Both packages are in the
-[latest release](https://github.com/johan-socarras/Everwall/releases/latest).
+Windows 11, in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/johan-socarras/Everwall/main/get.ps1 | iex
+```
+
+Ubuntu (GNOME), in a terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/johan-socarras/Everwall/main/get.sh | bash
+```
+
+Both download the package of the
+[latest release](https://github.com/johan-socarras/Everwall/releases/latest),
+check it against the SHA-256 GitHub publishes for it, install Everwall for
+the current user and start it. Running them again updates Everwall. On Ubuntu
+it also installs with apt the libraries listed below if any is missing, asking
+for your password through sudo. Read the scripts first if you like:
+[`get.ps1`](get.ps1), [`get.sh`](get.sh). To install by hand, follow the
+steps below.
 
 ### Windows 11
+
+The one-line install puts Everwall in `%LOCALAPPDATA%\Programs\Everwall` and
+adds it to the Start menu. By hand:
 
 1. Download `Everwall-<version>-windows-x64.zip`.
 2. Unzip it into a folder of your own, for example
@@ -64,6 +93,8 @@ support Ubuntu ships for tray icons, and `zenity` for the folder picker:
 sudo apt install libwebkit2gtk-4.1-0 libayatana-appindicator3-1 zenity
 ```
 
+The one-line install does the steps below for you. By hand:
+
 1. Download `Everwall-<version>-linux-x64.tar.gz` and unpack it.
 2. In the unpacked folder, run `./install.sh`. It copies `everwall` to
    `~/.local/bin`, adds it to the app grid and starts it.
@@ -74,7 +105,9 @@ Spanish or English following the session language. It starts when you log in
 (an entry in `~/.config/autostart`) and adds its keyboard shortcuts to
 Settings › Keyboard › Custom Shortcuts.
 
-**To uninstall:** run `./install.sh --uninstall`. It puts back the wallpaper
+**To uninstall:** run `./install.sh --uninstall` in the unpacked folder, or
+`curl -fsSL https://raw.githubusercontent.com/johan-socarras/Everwall/main/get.sh | bash -s -- --uninstall`.
+It puts back the wallpaper
 and accent colour you had before Everwall, removes its shortcuts, the autostart
 entry and the program, and leaves your settings in `~/.local/share/Everwall`.
 
@@ -137,6 +170,7 @@ own part.
   libraries. Opened in an ordinary browser it shows sample data.
 - `install.ps1` and `package.ps1`: install from source on Windows, or build
   the release zip. `install.sh` and `package.sh` do the same on Linux.
+  `get.ps1` and `get.sh`: the one-line install from the latest release.
 - `tools/make-icon.ps1`: draws the icon. `tools/third-party-licenses.py`
   writes `THIRD-PARTY-LICENSES.txt` from `Cargo.lock`, the Rust toolchain
   and the texts in `tools/licenses/` that come with no crate.
@@ -206,6 +240,12 @@ the file manager.
 ```
 
 Run them in the app's folder. On Ubuntu the same options go to `everwall`.
+
+## Contributors
+
+- [**johan-socarras**](https://github.com/johan-socarras): idea, design,
+  testing and direction.
+- **Claude** (Anthropic): the AI that wrote the code.
 
 ## License
 
